@@ -161,10 +161,10 @@ checkMobile();
 <div class="msgs" id="msgArea"><div class="welcome"><div class="icon">🎓</div><h2>报考模式</h2><p>输入分数省份位次帮你盘志愿</p></div></div>
 <div class="inp"><textarea id="inp" placeholder="输入消息..."></textarea><button id="sendBtn">发送</button></div></div>
 <div class="overlay" id="setOverlay"><div><h3>API设置</h3>
-<label>Base URL</label><input id="sUrl" placeholder="https://mimo.mi.com/api/v1">
+<label>Base URL</label><input id="sUrl" placeholder="https://api.deepseek.com">
 <label>API Key</label><input type="password" id="sKey" placeholder="sk-...">
-<label>Model</label><input id="sModel" placeholder="mimo-v2.5-pro">
-<div style="background:var(--side);border-radius:6px;padding:8px 10px;margin:4px 0 8px;font-size:11px;line-height:1.6;color:var(--txt)"><b>小米 MiMo API：</b> 默认已配置小米官方 MiMo V2.5 Pro 模型。在 <a href="https://platform.xiaomimimo.com" target="_blank" style="color:var(--red);font-weight:600">platform.xiaomimimo.com</a> 注册获取 API Key，填入下方即可使用。兼容 OpenAI 接口格式。</div>
+<label>Model</label><input id="sModel" placeholder="deepseek-chat">
+<div style="background:var(--side);border-radius:6px;padding:8px 10px;margin:4px 0 8px;font-size:11px;line-height:1.6;color:var(--txt)"><b>模型说明：</b> 默认 DeepSeek，填 Key 即用，浏览器直连无需代理。如需用小米 MiMo，先把 worker.js 部署到 <a href="https://dash.cloudflare.com" target="_blank" style="color:var(--red);font-weight:600">Cloudflare Workers</a>，然后把 Base URL 改成 Worker 地址。模型填 <code>mimo-v2.5-pro</code>。</div>
 <label>Tavily Key <span style="color:var(--red);font-size:11px;font-weight:600">(选填，但强烈推荐)</span></label><input type="password" id="sTav" placeholder="tvly-..."><div style="background:var(--side);border-radius:6px;padding:8px 10px;margin:4px 0 8px;font-size:11px;line-height:1.6;color:var(--txt)"><b>做什么的？</b> AI联网搜索引擎，比百度精准10倍，专为AI设计。<br><b>为什么推荐？</b> 填了之后Agent会自动搜索最新分数线、学校环境、王牌专业、就业薪资——回答质量天差地别。<br><b>要钱吗？</b> 免费额度每月1000次，正常使用完全够。<br><b>怎么获取？</b> 打开 <a href=\"https://tavily.com\" target=\"_blank\" style=\"color:var(--red);font-weight:600\">tavily.com</a> → 点 Get Started（Google/GitHub账号直接登）→ 复制 tvly- 开头的Key → 粘贴到这里。<br><b>不填行不行？</b> 行，但联网搜索基本废了（百度反爬），建议花1分钟注册。</div>
 <div class="btns"><button id="closeSetBtn">取消</button><button class="ok" id="testBtn">保存并测试</button></div><div class="st" id="st"></div></div></div>
 <script>
