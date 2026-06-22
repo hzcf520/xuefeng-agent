@@ -161,10 +161,10 @@ checkMobile();
 <div class="msgs" id="msgArea"><div class="welcome"><div class="icon">🎓</div><h2>报考模式</h2><p>输入分数省份位次帮你盘志愿</p></div></div>
 <div class="inp"><textarea id="inp" placeholder="输入消息..."></textarea><button id="sendBtn">发送</button></div></div>
 <div class="overlay" id="setOverlay"><div><h3>API设置</h3>
-<label>Base URL</label><input id="sUrl" placeholder="https://api.siliconflow.cn/v1">
+<label>Base URL</label><input id="sUrl" placeholder="https://mimo.mi.com/api/v1">
 <label>API Key</label><input type="password" id="sKey" placeholder="sk-...">
-<label>Model</label><input id="sModel" placeholder="XiaoMi/MiMo-V2.5-Pro">
-<div style="background:var(--side);border-radius:6px;padding:8px 10px;margin:4px 0 8px;font-size:11px;line-height:1.6;color:var(--txt)"><b>小米大模型 API：</b> 默认已填写XiaoMi/MiMo-V2.5-Pro 模型（通过 SiliconFlow）。只需填写 API Key 即可使用。其他兼容 OpenAI 接口的模型（如 DeepSeek、通义千问等）也可以替换 URL 和 Model。</div>
+<label>Model</label><input id="sModel" placeholder="mimo-v2.5-pro">
+<div style="background:var(--side);border-radius:6px;padding:8px 10px;margin:4px 0 8px;font-size:11px;line-height:1.6;color:var(--txt)"><b>小米 MiMo API：</b> 默认已配置小米官方 MiMo V2.5 Pro 模型。在 <a href="https://platform.xiaomimimo.com" target="_blank" style="color:var(--red);font-weight:600">platform.xiaomimimo.com</a> 注册获取 API Key，填入下方即可使用。兼容 OpenAI 接口格式。</div>
 <label>Tavily Key <span style="color:var(--red);font-size:11px;font-weight:600">(选填，但强烈推荐)</span></label><input type="password" id="sTav" placeholder="tvly-..."><div style="background:var(--side);border-radius:6px;padding:8px 10px;margin:4px 0 8px;font-size:11px;line-height:1.6;color:var(--txt)"><b>做什么的？</b> AI联网搜索引擎，比百度精准10倍，专为AI设计。<br><b>为什么推荐？</b> 填了之后Agent会自动搜索最新分数线、学校环境、王牌专业、就业薪资——回答质量天差地别。<br><b>要钱吗？</b> 免费额度每月1000次，正常使用完全够。<br><b>怎么获取？</b> 打开 <a href=\"https://tavily.com\" target=\"_blank\" style=\"color:var(--red);font-weight:600\">tavily.com</a> → 点 Get Started（Google/GitHub账号直接登）→ 复制 tvly- 开头的Key → 粘贴到这里。<br><b>不填行不行？</b> 行，但联网搜索基本废了（百度反爬），建议花1分钟注册。</div>
 <div class="btns"><button id="closeSetBtn">取消</button><button class="ok" id="testBtn">保存并测试</button></div><div class="st" id="st"></div></div></div>
 <script>
@@ -452,7 +452,7 @@ async function queryData(t){
   if(!dbData&&!webData)result+='DB和联网搜索均无结果。查询URL: recommend?province='+encodeURIComponent(info.province)+'&rank='+info.rank+'&score='+info.score+'&keyword='+encodeURIComponent((info.majors||[]).join(','))+'\n';
   return result;
 }
-function getCfg(){return{url:localStorage.getItem('cf_url')||'https://api.siliconflow.cn/v1',key:localStorage.getItem('cf_key')||'',model:localStorage.getItem('cf_model')||'XiaoMi/MiMo-V2.5-Pro',tavily:localStorage.getItem('cf_tav')||''};}
+function getCfg(){return{url:localStorage.getItem('cf_url')||'https://mimo.mi.com/api/v1',key:localStorage.getItem('cf_key')||'',model:localStorage.getItem('cf_model')||'XiaoMi/MiMo-V2.5-Pro',tavily:localStorage.getItem('cf_tav')||''};}
 function openSet(){var ov=S('setOverlay');if(ov)ov.style.display='flex';var c=getCfg();var su=S('sUrl'),sk=S('sKey'),sm=S('sModel'),st=S('sTav');if(su)su.value=c.url;if(sk)sk.value=c.key;if(sm)sm.value=c.model;if(st)st.value=c.tavily;}
 function closeSet(){var ov=S('setOverlay');if(ov)ov.style.display='none';}
 async function testConn(){var su=S('sUrl'),sk=S('sKey'),sm=S('sModel'),sv=S('sTav'),stt=S('st');if(!su||!sk||!stt)return;var u=su.value.trim(),k=sk.value.trim(),m=sm?sm.value.trim():'',tv=sv?sv.value.trim():'';if(!u||!k){stt.innerHTML='<span class=\"st b\">请填写URL和Key</span>';return;}try{localStorage.setItem('cf_url',u);localStorage.setItem('cf_key',k);localStorage.setItem('cf_model',m);if(tv)localStorage.setItem('cf_tav',tv);}catch(e){}stt.textContent='测试中...';try{var r=await fetch(u.replace(/\/+$/,'')+'/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+k},body:JSON.stringify({model:m||'deepseek-chat',messages:[{role:'user',content:'hi'}],max_tokens:5})});if(r.ok){stt.innerHTML='<span class=\"st g\">连接OK</span>';setTimeout(closeSet,800);}else{var e=await r.json().catch(function(){return{};});stt.innerHTML='<span class=\"st b\">'+(e.error&&e.error.message||'')+'</span>';}}catch(e){stt.innerHTML='<span class=\"st b\">连接失败: '+e.message+'<br><small>请求地址: '+u.replace(/\/+$/,'')+'/v1/chat/completions</small></span>';}}
