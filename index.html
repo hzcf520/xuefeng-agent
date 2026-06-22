@@ -35,21 +35,136 @@ body{font:14px/1.7 'PingFang SC','Microsoft YaHei',sans-serif;background:var(--b
 @keyframes dot{0%,80%,100%{transform:scale(.6)}40%{transform:scale(1)}}
 .fun-bg{position:relative}.fun-bg::before{content:'';position:absolute;left:0;top:0;bottom:0;width:58%;background:url(img_scifi.png) left center/contain no-repeat;opacity:0.8;pointer-events:none;z-index:0}
 .bubble{position:relative;z-index:1}.welcome{position:relative;z-index:1}
-</style><script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+
+/* ===== Mobile Responsive ===== */
+@media (max-width: 768px) {
+  body { flex-direction: column; }
+  .bar img { display: none; }
+  .side {
+    width: 100% !important;
+    max-height: 0;
+    overflow: hidden;
+    border-right: none;
+    border-bottom: 1px solid var(--bdr);
+    transition: max-height 0.3s ease;
+    position: relative;
+    z-index: 50;
+  }
+  .side.open { max-height: 60vh; }
+  .side h2, .side .sub { display: none; }
+  .side .list { padding: 4px 8px; }
+  .side .new-btn { margin: 4px 8px 8px; padding: 6px; }
+  .bar {
+    height: 48px;
+    padding: 0 8px;
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+  .bar .logo { font-size: 14px; }
+  .bar button { padding: 4px 8px; font-size: 11px; }
+  .bar .api-btn { font-size: 11px; padding: 4px 8px; }
+  .bar img { width: 32px; height: 32px; }
+  .msgs { padding: 12px 14px; }
+  .welcome { margin-top: 40px; }
+  .welcome .icon { font-size: 36px; }
+  .bubble { max-width: 90%; font-size: 13px; padding: 10px 12px; }
+  .inp { padding: 8px 10px 12px; gap: 6px; }
+  .inp textarea { height: 40px; padding: 8px; font-size: 14px; }
+  .inp button { padding: 0 14px; font-size: 13px; }
+  .overlay>div {
+    width: 92vw !important;
+    padding: 20px 16px;
+    border-radius: 10px;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  .overlay h3 { font-size: 16px; }
+  .overlay input { padding: 10px; font-size: 14px; }
+  .fun-bg::before { width: 100%; opacity: 0.4; }
+}
+.mobile-new-chat {
+  display: none;
+  position: fixed;
+  bottom: 80px;
+  right: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--red);
+  color: #fff;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 40;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+  line-height: 48px;
+  text-align: center;
+}
+@media (max-width: 768px) {
+  .mobile-new-chat { display: block; }
+}
+@media (max-width: 380px) {
+  .bar { height: 42px; padding: 0 6px; gap: 4px; }
+  .bar .logo { font-size: 12px; }
+  .bar button { padding: 3px 6px; font-size: 10px; }
+  .bubble { max-width: 95%; font-size: 12px; }
+  .inp textarea { height: 36px; }
+}
+</style><script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js">
+// ===== Mobile new chat button =====
+(function(){
+  var mnb = document.getElementById('mobileNewBtn');
+  if(mnb) mnb.onclick = function(){ newChat(); };
+})();
+
+// ===== Mobile menu toggle =====
+function toggleMenu(){
+  var side=document.querySelector('.side');
+  if(side) side.classList.toggle('open');
+}
+function checkMobile(){
+  var btn=document.getElementById('menuBtn');
+  if(btn){
+    btn.style.display=window.innerWidth<=768?'inline-block':'none';
+  }
+  // Close sidebar when clicking outside on mobile
+  if(window.innerWidth>768){
+    var side=document.querySelector('.side');
+    if(side) side.classList.remove('open');
+  }
+}
+window.addEventListener('resize',checkMobile);
+checkMobile();
+(function(){
+  var mb=document.getElementById('menuBtn');
+  if(mb) mb.onclick=toggleMenu;
+  // Close sidebar after selecting a chat on mobile
+  var cl=document.getElementById('chatList');
+  if(cl){
+    cl.addEventListener('click',function(){
+      if(window.innerWidth<=768){
+        var side=document.querySelector('.side');
+        if(side) side.classList.remove('open');
+      }
+    });
+  }
+})();
+</script>
 <style>.db-loading{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;flex-direction:column;gap:12px}.db-loading .spinner{width:40px;height:40px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}</style>
 </head><body>
 <div class="db-loading" id="dbLoader"><div class="spinner"></div><span>加载数据库中...</span></div>
 <div class="side"><h2>雪峰Agent v2.3</h2><div class="sub">AI高考志愿顾问</div>
 <div class="list" id="chatList"></div><div class="new-btn" id="newBtn">+ 新建对话</div></div>
-<div class="main"><div class="bar"><span class="logo">雪峰Agent</span>
+<div class="main"><div class="bar"><button id="menuBtn" style="display:none;font-size:18px;padding:4px 8px;background:none;border:none;cursor:pointer;color:var(--txt)">☰</button><span class="logo">雪峰Agent</span>
 <button id="btnG" class="on">报考</button><button id="btnF">娱乐</button>
 <img id="avt" src="img_suit.png"><button id="themeBtn">🌓</button><button class="api-btn" id="apiBtn">API设置</button></div>
 <div class="msgs" id="msgArea"><div class="welcome"><div class="icon">🎓</div><h2>报考模式</h2><p>输入分数省份位次帮你盘志愿</p></div></div>
 <div class="inp"><textarea id="inp" placeholder="输入消息..."></textarea><button id="sendBtn">发送</button></div></div>
 <div class="overlay" id="setOverlay"><div><h3>API设置</h3>
-<label>Base URL</label><input id="sUrl" placeholder="https://api.deepseek.com">
+<label>Base URL</label><input id="sUrl" placeholder="https://api.siliconflow.cn/v1">
 <label>API Key</label><input type="password" id="sKey" placeholder="sk-...">
-<label>Model</label><input id="sModel" placeholder="deepseek-chat">
+<label>Model</label><input id="sModel" placeholder="XiaoMi/MiMo-7B-RL">
+<div style="background:var(--side);border-radius:6px;padding:8px 10px;margin:4px 0 8px;font-size:11px;line-height:1.6;color:var(--txt)"><b>小米大模型 API：</b> 默认已填写XiaoMi/MiMo-7B-RL 模型（通过 SiliconFlow）。只需填写 API Key 即可使用。其他兼容 OpenAI 接口的模型（如 DeepSeek、通义千问等）也可以替换 URL 和 Model。</div>
 <label>Tavily Key <span style="color:var(--red);font-size:11px;font-weight:600">(选填，但强烈推荐)</span></label><input type="password" id="sTav" placeholder="tvly-..."><div style="background:var(--side);border-radius:6px;padding:8px 10px;margin:4px 0 8px;font-size:11px;line-height:1.6;color:var(--txt)"><b>做什么的？</b> AI联网搜索引擎，比百度精准10倍，专为AI设计。<br><b>为什么推荐？</b> 填了之后Agent会自动搜索最新分数线、学校环境、王牌专业、就业薪资——回答质量天差地别。<br><b>要钱吗？</b> 免费额度每月1000次，正常使用完全够。<br><b>怎么获取？</b> 打开 <a href=\"https://tavily.com\" target=\"_blank\" style=\"color:var(--red);font-weight:600\">tavily.com</a> → 点 Get Started（Google/GitHub账号直接登）→ 复制 tvly- 开头的Key → 粘贴到这里。<br><b>不填行不行？</b> 行，但联网搜索基本废了（百度反爬），建议花1分钟注册。</div>
 <div class="btns"><button id="closeSetBtn">取消</button><button class="ok" id="testBtn">保存并测试</button></div><div class="st" id="st"></div></div></div>
 <script>
@@ -337,7 +452,7 @@ async function queryData(t){
   if(!dbData&&!webData)result+='DB和联网搜索均无结果。查询URL: recommend?province='+encodeURIComponent(info.province)+'&rank='+info.rank+'&score='+info.score+'&keyword='+encodeURIComponent((info.majors||[]).join(','))+'\n';
   return result;
 }
-function getCfg(){return{url:localStorage.getItem('cf_url')||'https://api.deepseek.com',key:localStorage.getItem('cf_key')||'',model:localStorage.getItem('cf_model')||'deepseek-chat',tavily:localStorage.getItem('cf_tav')||''};}
+function getCfg(){return{url:localStorage.getItem('cf_url')||'https://api.siliconflow.cn/v1',key:localStorage.getItem('cf_key')||'',model:localStorage.getItem('cf_model')||'XiaoMi/MiMo-7B-RL',tavily:localStorage.getItem('cf_tav')||''};}
 function openSet(){var ov=S('setOverlay');if(ov)ov.style.display='flex';var c=getCfg();var su=S('sUrl'),sk=S('sKey'),sm=S('sModel'),st=S('sTav');if(su)su.value=c.url;if(sk)sk.value=c.key;if(sm)sm.value=c.model;if(st)st.value=c.tavily;}
 function closeSet(){var ov=S('setOverlay');if(ov)ov.style.display='none';}
 async function testConn(){var su=S('sUrl'),sk=S('sKey'),sm=S('sModel'),sv=S('sTav'),stt=S('st');if(!su||!sk||!stt)return;var u=su.value.trim(),k=sk.value.trim(),m=sm?sm.value.trim():'',tv=sv?sv.value.trim():'';if(!u||!k){stt.innerHTML='<span class=\"st b\">请填写URL和Key</span>';return;}try{localStorage.setItem('cf_url',u);localStorage.setItem('cf_key',k);localStorage.setItem('cf_model',m);if(tv)localStorage.setItem('cf_tav',tv);}catch(e){}stt.textContent='测试中...';try{var r=await fetch(u.replace(/\/+$/,'')+'/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+k},body:JSON.stringify({model:m||'deepseek-chat',messages:[{role:'user',content:'hi'}],max_tokens:5})});if(r.ok){stt.innerHTML='<span class=\"st g\">连接OK</span>';setTimeout(closeSet,800);}else{var e=await r.json().catch(function(){return{};});stt.innerHTML='<span class=\"st b\">'+(e.error&&e.error.message||'')+'</span>';}}catch(e){stt.innerHTML='<span class=\"st b\">连接失败: '+e.message+'<br><small>请求地址: '+u.replace(/\/+$/,'')+'/v1/chat/completions</small></span>';}}
@@ -357,4 +472,5 @@ if(localStorage.getItem('xf_dark')==='1')document.body.classList.add('dark');
 if(!curId||!chats[curId]){var nid=Date.now()+'';chats[nid]={name:'新对话',mode:mode,msgs:[]};curId=nid;save();}
 setMode(mode);render();
 }catch(e){console.warn('init error:',e.message);document.body.innerHTML='<div style=\"padding:40px;text-align:center\"><h2>加载失败</h2><p>请清除浏览器缓存后刷新 (Ctrl+Shift+Del)</p></div>';}
-</script></body></html>
+</script><button class="mobile-new-chat" id="mobileNewBtn" title="新建对话">+</button>
+</body></html>
