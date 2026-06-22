@@ -453,7 +453,7 @@ async function queryData(t){
   return result;
 }
 function getCfg(){return{url:localStorage.getItem('cf_url')||'https://api.deepseek.com',key:localStorage.getItem('cf_key')||'',model:localStorage.getItem('cf_model')||'deepseek-chat',tavily:localStorage.getItem('cf_tav')||''};}
-function openSet(){var ov=S('setOverlay');if(ov)ov.style.display='flex';var c=getCfg();var su=S('sUrl'),sk=S('sKey'),sm=S('sModel'),st=S('sTav');if(su)su.value=c.url;if(sk)sk.value=c.key;if(sm)sm.value=c.model;if(st)st.value=c.tavily;}
+function openSet(){var ov=S('setOverlay');if(ov)ov.style.display='flex';var c=getCfg();var su=S('sUrl'),sk=S('sKey'),sm=S('sModel'),st=S('sTav');if(su)su.value=c.url||'https://api.deepseek.com';if(sk)sk.value=c.key;if(sm)sm.value=c.model||'deepseek-chat';if(st)st.value=c.tavily;}
 function closeSet(){var ov=S('setOverlay');if(ov)ov.style.display='none';}
 async function testConn(){var su=S('sUrl'),sk=S('sKey'),sm=S('sModel'),sv=S('sTav'),stt=S('st');if(!su||!sk||!stt)return;var u=su.value.trim(),k=sk.value.trim(),m=sm?sm.value.trim():'',tv=sv?sv.value.trim():'';if(!u||!k){stt.innerHTML='<span class=\"st b\">请填写URL和Key</span>';return;}try{localStorage.setItem('cf_url',u);localStorage.setItem('cf_key',k);localStorage.setItem('cf_model',m);if(tv)localStorage.setItem('cf_tav',tv);}catch(e){}stt.textContent='测试中...';try{var r=await fetch(u.replace(/\/+$/,'')+'/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+k},body:JSON.stringify({model:m||'deepseek-chat',messages:[{role:'user',content:'hi'}],max_tokens:5})});if(r.ok){stt.innerHTML='<span class=\"st g\">连接OK</span>';setTimeout(closeSet,800);}else{var e=await r.json().catch(function(){return{};});stt.innerHTML='<span class=\"st b\">'+(e.error&&e.error.message||'')+'</span>';}}catch(e){stt.innerHTML='<span class=\"st b\">连接失败: '+e.message+'<br><small>请求地址: '+u.replace(/\/+$/,'')+'/v1/chat/completions</small></span>';}}
 
@@ -468,6 +468,13 @@ B('inp','onkeydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefaul
 B('chatList','onclick',function(e){var el=e.target;if(el.dataset.del){delChat(el.dataset.del);return;}var item=el.closest('.item');if(item){curId=item.dataset.id;if(chats[curId]&&chats[curId].mode)setMode(chats[curId].mode);else render();save();}});
 // init
 try{
+// Clear stale API config if it was Xiaomi (one-time cleanup)
+try{
+  var savedUrl=localStorage.getItem('cf_url')||'';
+  if(savedUrl.indexOf('mimo.mi.com')>=0||savedUrl.indexOf('xiaomi')>=0||savedUrl.indexOf('siliconflow')>=0){
+    localStorage.removeItem('cf_url');localStorage.removeItem('cf_model');
+  }
+}catch(e){}
 if(localStorage.getItem('xf_dark')==='1')document.body.classList.add('dark');
 if(!curId||!chats[curId]){var nid=Date.now()+'';chats[nid]={name:'新对话',mode:mode,msgs:[]};curId=nid;save();}
 setMode(mode);render();
